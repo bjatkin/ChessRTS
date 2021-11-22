@@ -27,7 +27,9 @@ type Keyboard struct {
 
 func NewKeyboard(mapping []Mapping) *Keyboard {
 	return &Keyboard{
-		Convert: mapping,
+		Convert:  mapping,
+		DownNow:  make(map[int]bool),
+		DownLast: make(map[int]bool),
 	}
 }
 

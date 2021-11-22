@@ -44,6 +44,21 @@ func (s *TestScene) Init() error {
 }
 
 func (s *TestScene) Update() error {
+	s.Keyboard.Update()
+
+	if s.Keyboard.Down(controller.A) {
+		s.Camera.X++
+	}
+	if s.Keyboard.Down(controller.D) {
+		s.Camera.X--
+	}
+	if s.Keyboard.Down(controller.W) {
+		s.Camera.Y++
+	}
+	if s.Keyboard.Down(controller.S) {
+		s.Camera.Y--
+	}
+
 	// run all the entity updates
 	for id, e := range s.Manager.All() {
 		err := e.Update()
@@ -58,7 +73,8 @@ func (s *TestScene) Update() error {
 func (s *TestScene) Draw(screen *ebiten.Image) {
 	// draw all the scene entities
 	for _, e := range s.Manager.All() {
-		e.Draw(screen, e.Trans())
+		tmp := e.Trans().Pos.Add(s.Camera)
+		e.Draw(screen, &entity.Transform{Pos: tmp, Scale: e.Trans().Scale})
 	}
 }
 
