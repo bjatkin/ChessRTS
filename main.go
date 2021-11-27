@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/bjatkin/chessRTS/controller"
+	"github.com/bjatkin/chessRTS/control"
 	"github.com/bjatkin/chessRTS/entity"
 	"github.com/bjatkin/chessRTS/game"
 	"github.com/bjatkin/chessRTS/game/scene"
@@ -14,13 +14,13 @@ func main() {
 	main := &game.Game{
 		Debug: true,
 		Scene: &scene.TestScene{
-			Manager: entity.NewEntityManger(),
-			Keyboard: controller.NewKeyboard(
-				[]controller.Mapping{
-					{Key: ebiten.KeyW, Local: controller.W},
-					{Key: ebiten.KeyA, Local: controller.A},
-					{Key: ebiten.KeyS, Local: controller.S},
-					{Key: ebiten.KeyD, Local: controller.D},
+			Manager: entity.NewManger(),
+			Keyboard: control.NewKeyboard(
+				map[ebiten.Key]int{
+					ebiten.KeyW: control.W,
+					ebiten.KeyA: control.A,
+					ebiten.KeyS: control.S,
+					ebiten.KeyD: control.D,
 				},
 			),
 		},

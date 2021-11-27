@@ -9,7 +9,7 @@ import (
 )
 
 type Entity interface {
-	Draw(*ebiten.Image, *Transform)
+	Draw(*ebiten.Image)
 	Update() error
 	Trans() *Transform
 	Layer() int
@@ -30,9 +30,9 @@ func NewBase(gfx *ebiten.Image, layer int) *Base {
 	}
 }
 
-func (e *Base) Draw(screen *ebiten.Image, screenSpace *Transform) {
-	if e.GFX != nil && screenSpace != nil {
-		screen.DrawImage(e.GFX, screenSpace.DrawImageOptions())
+func (e *Base) Draw(screen *ebiten.Image) {
+	if e.GFX != nil {
+		screen.DrawImage(e.GFX, e.Trans().DrawImageOptions())
 	}
 }
 
@@ -63,7 +63,7 @@ func (t *Transform) DrawImageOptions() *ebiten.DrawImageOptions {
 
 type ID uint64
 
-type EntityManger struct {
+type Manger struct {
 	Entities map[ID]entityLocation
 	Layers   [][]Entity
 }
@@ -73,14 +73,20 @@ type entityLocation struct {
 	index int
 }
 
-func NewEntityManger() *EntityManger {
-	return &EntityManger{
+func NewManger(add ...Entity) *Manger {
+	manager := &Manger{
 		Entities: make(map[ID]entityLocation),
 		Layers:   make([][]Entity, layer.Total),
 	}
+
+	for _, ent := range add {
+		manager.Add(ent)
+	}
+
+	return manager
 }
 
-func (em *EntityManger) Add(ent Entity) ID {
+func (em *Manger) Add(ent Entity) ID {
 	// get a unique random id
 	id := rand.Int()
 	for _, ok := em.Entities[ID(id)]; ok; id = rand.Int() {
@@ -92,7 +98,7 @@ func (em *EntityManger) Add(ent Entity) ID {
 	return ID(id)
 }
 
-func (em *EntityManger) Del(id ID) bool {
+func (em *Manger) Del(id ID) bool {
 	location, ok := em.Entities[id]
 	if !ok {
 		return false
@@ -109,7 +115,7 @@ func (em *EntityManger) Del(id ID) bool {
 	return true
 }
 
-func (em *EntityManger) Get(id ID) (Entity, bool) {
+func (em *Manger) Get(id ID) (Entity, bool) {
 	location, ok := em.Entities[id]
 	if !ok {
 		return nil, false
@@ -118,7 +124,7 @@ func (em *EntityManger) Get(id ID) (Entity, bool) {
 	return em.Layers[location.layer][location.index], true
 }
 
-func (em *EntityManger) All() []Entity {
+func (em *Manger) All() []Entity {
 	var entities []Entity
 	for _, layer := range em.Layers {
 		for _, ent := range layer {

@@ -1,7 +1,7 @@
 package scene
 
 import (
-	"github.com/bjatkin/chessRTS/controller"
+	"github.com/bjatkin/chessRTS/control"
 	"github.com/bjatkin/chessRTS/entity"
 	"github.com/bjatkin/chessRTS/entity/prefabs"
 	"github.com/bjatkin/chessRTS/errors"
@@ -10,10 +10,10 @@ import (
 )
 
 type TestScene struct {
-	Manager  *entity.EntityManger
+	Manager  *entity.Manger
 	Map      entity.ID
 	Camera   math.IVec2
-	Keyboard *controller.Keyboard
+	Keyboard *control.Keyboard
 }
 
 // nodes determines the map layout
@@ -46,16 +46,16 @@ func (s *TestScene) Init() error {
 func (s *TestScene) Update() error {
 	s.Keyboard.Update()
 
-	if s.Keyboard.Down(controller.A) {
+	if s.Keyboard.Down(control.A) {
 		s.Camera.X++
 	}
-	if s.Keyboard.Down(controller.D) {
+	if s.Keyboard.Down(control.D) {
 		s.Camera.X--
 	}
-	if s.Keyboard.Down(controller.W) {
+	if s.Keyboard.Down(control.W) {
 		s.Camera.Y++
 	}
-	if s.Keyboard.Down(controller.S) {
+	if s.Keyboard.Down(control.S) {
 		s.Camera.Y--
 	}
 
@@ -73,8 +73,15 @@ func (s *TestScene) Update() error {
 func (s *TestScene) Draw(screen *ebiten.Image) {
 	// draw all the scene entities
 	for _, e := range s.Manager.All() {
-		tmp := e.Trans().Pos.Add(s.Camera)
-		e.Draw(screen, &entity.Transform{Pos: tmp, Scale: e.Trans().Scale})
+		// move the entity based on the camera's position
+		oldX, oldY := e.Trans().Pos.X, e.Trans().Pos.Y
+		e.Trans().Pos.X += s.Camera.X
+		e.Trans().Pos.Y += s.Camera.Y
+
+		e.Draw(screen)
+
+		// undo the camera's transform
+		e.Trans().Pos.X, e.Trans().Pos.Y = oldX, oldY
 	}
 }
 
